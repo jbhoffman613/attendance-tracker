@@ -1,27 +1,11 @@
 import random
 import pickle
+import sys
 from colorama import Fore, Style
-
-STARTING_SCORE = 1500
-
-class Record:
-
-    def __init__(self):
-        self.absences = 0
-        self.score = 0
-
-    def absent(self):
-        ''' Increment the number of absences by 1. '''
-        self.absences += 1
-
-    def present(self, answer: int=0):
-        ''' Decreases the score by the answer. '''
-        self.score = min(100, self.score - answer)
-
 
 def add_record(records: dict, student: str) -> None:
     ''' Add a record to the records. '''
-    records[student] = STARTING_SCORE
+    records[student] = []
 
 def load_records(file: str='records.pkl') -> dict:
     ''' Load the records from the file. '''
@@ -50,19 +34,18 @@ def get_weights(students: dict) -> list:
 
 def pick_someone(students: dict) -> str:
     """Pick a random student from the list of students."""
-    weights = get_weights(students)
-    return random.choices(list(students.keys()), weights=weights, k=1)[0]
+    return random.choices(list(students.keys()))[0]
 
 def update_attendance(students: dict, student: str, response: str="noop") -> bool:
     """Update the attendance of a student."""
     if response == "answered":
-        students[student] -=500
+        students[student].append(1)
         return True
     elif response == "passed":
-        students[student] -= 250
+        students[student].append(0.5)
         return True
     elif response == "absent":
-        students[student] += 750
+        students[student].append(0)
         return True
     else:
         return False
@@ -71,22 +54,18 @@ def question_response(students: dict, student: str) -> None:
     """Loop for the interaction."""
     valid_options = ["answered", "passed", "absent", "exit"]
     valid_response = False
+    # TODO: Test this loop and all possible paths
     while not valid_response:
         query = (f"How did the {student} respond? The options are: "
                  f"{valid_options[0]}, {valid_options[1]}, {valid_options[2]}, "
                  f"or {valid_options[3]}.\n? ")
         response = input(query)
-        if response in valid_options:
-            valid_response = True
-            if response == "exit":
-                save_records(students)
-                print(Fore.GREEN + "The records have been saved." + Style.RESET_ALL)
-                exit()
-            else:
-                response = update_attendance(students, student, response)
-                if response is False:
-                    valid_response = False
-        else:
+        if response == "exit":
+            save_records(students)
+            print(Fore.GREEN + "The records have been saved." + Style.RESET_ALL)
+            sys.exit()
+        valid_response = update_attendance(students, student, response)
+        if not valid_response:
             print(Fore.YELLOW + "Invalid response. Please try again." + Style.RESET_ALL + "\n")
 
 def death_knell(students: dict, file: str='records.pkl') -> None:
