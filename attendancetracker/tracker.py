@@ -103,6 +103,12 @@ def lifecycle_loop() -> None:
 
     records = load_records(record_name)
 
+    if len(records.keys()) == 0:
+        print(Fore.YELLOW
+              + "Did not successfully load in a set of records. Going to exit and save nothing"
+              + Style.RESET_ALL)
+        sys.exit()
+
     # death_knell(students: dict, file: str=RECORDS_FNAME)
     atexit.register(death_knell, students=records, file=record_name)
 
@@ -110,5 +116,7 @@ def lifecycle_loop() -> None:
     user_loop(records)
 
 if __name__ == "__main__":
-    # Call the main function 
+    # Call the main function
     lifecycle_loop()
+
+    # TODO: Add argparse to handle first time set up 
