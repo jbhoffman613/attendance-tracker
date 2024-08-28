@@ -2,6 +2,7 @@ import random
 import pickle
 import sys
 import atexit
+import argparse
 from colorama import Fore, Style
 
 RECORDS_FNAME = 'records.pkl'
@@ -29,6 +30,11 @@ def save_records(records: dict, file: str=RECORDS_FNAME) -> None:
         print(Fore.RED + 'IT WAS NOT SAVED CORRECTLY!')
         print(Style.RESET_ALL)
         print(e)
+
+def make_empty_records() -> dict:
+    ''' Make an empty records dictionary. '''
+    save_records(records={})
+    return {}
 
 def pick_someone(students: dict) -> str:
     """Pick a random student from the list of students."""
@@ -105,9 +111,8 @@ def lifecycle_loop() -> None:
 
     if len(records.keys()) == 0:
         print(Fore.YELLOW
-              + "Did not successfully load in a set of records. Going to exit and save nothing"
+              + "Did not successfully load in a set of records. WARNING IT IS EMPTY"
               + Style.RESET_ALL)
-        sys.exit()
 
     # death_knell(students: dict, file: str=RECORDS_FNAME)
     atexit.register(death_knell, students=records, file=record_name)
@@ -116,7 +121,15 @@ def lifecycle_loop() -> None:
     user_loop(records)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--make', type=bool,
+                        help='make an empty file that will overwrite the current records file',)
+    args = parser.parse_args()
+    if args.make:
+        make_empty_records()
+        sys.exit()
+
     # Call the main function
     lifecycle_loop()
 
-    # TODO: Add argparse to handle first time set up 
+    # TODO: Add argparse to handle first time set up
