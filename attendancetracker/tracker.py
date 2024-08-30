@@ -7,6 +7,13 @@ from colorama import Fore, Style
 
 RECORDS_FNAME = 'records.pkl'
 
+def display_names(records: dict) -> None:
+    ''' Display the records. '''
+    print("The students are:\n" + Fore.GREEN)
+    for student in records.keys():
+        print(student)
+    print(Style.RESET_ALL)
+
 def add_record(records: dict, student: str) -> None:
     ''' Add a record to the records. '''
     records[student] = []
@@ -97,6 +104,8 @@ def user_loop(student_records: dict) -> None:
         elif picked == 'add':
             student = input("Type in the student's name: ")
             add_record(student_records, student)
+        elif picked == 'display':
+            display_names(student_records)
         else:
             print(Fore.YELLOW + "Invalid response. Please try again." + Style.RESET_ALL + "\n")
 
@@ -131,5 +140,3 @@ if __name__ == "__main__":
 
     # Call the main function
     lifecycle_loop()
-
-    # TODO: Add argparse to handle first time set up
