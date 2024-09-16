@@ -91,7 +91,7 @@ def user_loop(student_records: dict) -> None:
     # TODO: see scratch for how to ensure save on atexit
     # TODO: add a way to add a student
     while True:
-        picked = input("Type in \'next\' to continue, \'add\' to add a student, or \'exit\'.\n? ")
+        picked = input("Type in \'next\' to continue, \'add\' to add a student, \'display\' to show all students, or \'exit\'.\n? ")
         picked = picked.lower()
         if picked == 'next':
             student = pick_someone(student_records)
