@@ -3,6 +3,7 @@ import pickle
 import sys
 import atexit
 import argparse
+import pandas as pd
 from colorama import Fore, Style
 
 RECORDS_FNAME = 'records.pkl'
@@ -46,6 +47,23 @@ def make_empty_records() -> dict:
 def pick_someone(students: dict) -> str:
     """Pick a random student from the list of students."""
     return random.choices(list(students.keys()))[0]
+
+def test_picker(students: dict, iters: int=1000) -> None:
+    """Test the picker."""
+    counter = {}
+    for _ in range(iters):
+        student = pick_someone(students)
+        if student in counter:
+            counter[student] += 1
+        else:
+            counter[student] = 1
+        if len(counter.keys()) == len(students.keys()):
+            counts = list(counter.values())
+            print(f"Got all students after {sum(counts)} iterations.")
+            print(pd.Series(counts).describe())
+            return
+    print("Did not get all students.")
+    return
 
 def update_attendance(students: dict, student: str, response: str="noop") -> bool:
     """Update the attendance of a student."""
@@ -106,6 +124,8 @@ def user_loop(student_records: dict) -> None:
             add_record(student_records, student)
         elif picked == 'display':
             display_names(student_records)
+        elif picked == 'test':
+            test_picker(student_records)
         else:
             print(Fore.YELLOW + "Invalid response. Please try again." + Style.RESET_ALL + "\n")
 
