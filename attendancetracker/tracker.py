@@ -1,4 +1,6 @@
+''' This CLI app tracks the attendance of students. '''
 import random
+import datetime
 import pickle
 import sys
 import atexit
@@ -47,6 +49,24 @@ def make_empty_records() -> dict:
 def pick_someone(students: dict) -> str:
     """Pick a random student from the list of students."""
     return random.choices(list(students.keys()))[0]
+
+def pick_unpicked(students: dict) -> str:
+    """Pick a student who has not been picked yet."""
+    unpicked = [student for student in students.keys() if len(students[student]) == 0]
+    if len(unpicked) == 0:
+        return pick_someone(students)
+    return random.choices(unpicked)[0]
+
+def pick_lowest_score(students: dict) -> str:
+    """Pick the student with the lowest score."""
+    scores = {student: sum(students[student])/len(students[student]) for student in students.keys()}
+    min_score = float('inf')
+    min_student = ''
+    for i in scores.keys():
+        if scores[i] < min_score:
+            min_score = scores[i]
+            min_student = i
+    return min_student
 
 def test_picker(students: dict, iters: int=1000) -> None:
     """Test the picker."""
@@ -103,16 +123,27 @@ def death_knell(students: dict, file: str=RECORDS_FNAME) -> None:
     """Print a message to the user."""
     save_records(records=students, file=file)
 
+def display_features() -> None:
+    """Display the features of the program."""
+    features = ("Type in \'next\' to continue, \'add\' to add a student, "
+                + "\'display\' to show all students, or \'exit\'.\n? ")
+    print(features)
 
 def user_loop(student_records: dict) -> None:
     """Loop for the user interaction."""
-    # TODO: see scratch for how to ensure save on atexit
-    # TODO: add a way to add a student
     while True:
-        picked = input("Type in \'next\' to continue, \'add\' to add a student, \'display\' to show all students, or \'exit\'.\n? ")
+        picked = input("Type in the command: ")
         picked = picked.lower()
         if picked == 'next':
             student = pick_someone(student_records)
+            print(f"The student is {student}.")
+            question_response(student_records, student)
+        elif picked == 'unpicked':
+            student = pick_unpicked(student_records)
+            print(f"The student is {student}.")
+            question_response(student_records, student)
+        elif picked == 'lowest':
+            student = pick_lowest_score(student_records)
             print(f"The student is {student}.")
             question_response(student_records, student)
         elif picked == 'exit':
@@ -126,6 +157,13 @@ def user_loop(student_records: dict) -> None:
             display_names(student_records)
         elif picked == 'test':
             test_picker(student_records)
+        elif picked == 'help':
+            display_features()
+        elif picked == 'options':
+            print(Fore.GREEN
+                  + "The options are: next, unpicked, lowest, add, display, "
+                  + "exit, test, help, or options."
+                  + Style.RESET_ALL)
         else:
             print(Fore.YELLOW + "Invalid response. Please try again." + Style.RESET_ALL + "\n")
 
@@ -150,6 +188,16 @@ def lifecycle_loop() -> None:
     user_loop(records)
 
 if __name__ == "__main__":
+    # Get the current date and time
+    now = datetime.datetime.now()
+
+    # Convert the date and time to an integer using the timestamp() method
+    timestamp = int(now.timestamp())
+
+    # Set the random seed
+    random.seed(timestamp)
+
+    # Run the program
     parser = argparse.ArgumentParser()
     parser.add_argument('--make', type=bool,
                         help='make an empty file that will overwrite the current records file',)
