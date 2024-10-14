@@ -58,14 +58,28 @@ def pick_unpicked(students: dict) -> str:
     return random.choices(unpicked)[0]
 
 def pick_lowest_score(students: dict) -> str:
-    """Pick the student with the lowest score."""
-    scores = {student: sum(students[student])/len(students[student]) for student in students.keys()}
+    """Pick the student with the lowest score. It assumes that any student that has not yet
+    been picked will have the lowest possible score of 0.
+
+    Args:
+        students: The dictionary of students and their scores.
+    Returns:
+        str: The name of the student with the lowest score."""
+    # Calculate the average score for each student
+    scores = {}
+    for student in students.keys():
+        if len(students[student]) == 0:
+            scores[student] = 0
+        else:
+            scores[student] = sum(students[student])/len(students[student])
+
+    # Find the student with the lowest score
     min_score = float('inf')
     min_student = ''
-    for i in scores.keys():
-        if scores[i] < min_score:
-            min_score = scores[i]
-            min_student = i
+    for stud, curr_score in scores.items():
+        if curr_score < min_score:
+            min_score = curr_score
+            min_student = stud
     return min_student
 
 def test_picker(students: dict, iters: int=1000) -> None:
@@ -105,7 +119,6 @@ def question_response(students: dict, student: str) -> None:
     """Loop for the interaction."""
     valid_options = ["answered", "passed", "absent", "excused", "exit"]
     valid_response = False
-    # TODO: Test this loop and all possible paths
     while not valid_response:
         query = (f"How did the {student} respond? The options are: "
                  f"{valid_options[0]}, {valid_options[1]}, {valid_options[2]}, "
