@@ -147,7 +147,7 @@ def print_scores(students: dict) -> None:
     """Print the scores of the students."""
     print("The scores are:\n")
     for student, scores in students.items():
-        print(f"{student}: {scores}")
+        print(f"{student}: {sum(scores)/len(scores)}")
     print('\n')
 
 def student_stats(students: dict) -> None:
