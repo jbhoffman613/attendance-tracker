@@ -9,6 +9,7 @@ import pandas as pd
 from colorama import Fore, Style
 
 RECORDS_FNAME = 'records.pkl'
+RECORDS_COPY_FNAME = 'records_recent.pkl'
 
 def display_names(records: dict) -> None:
     ''' Display the records. '''
@@ -142,6 +143,41 @@ def display_features() -> None:
                 + "\'display\' to show all students, or \'exit\'.\n? ")
     print(features)
 
+def print_scores(students: dict) -> None:
+    """Print the scores of the students."""
+    print("The scores are:\n")
+    for student, scores in students.items():
+        print(f"{student}: {scores}")
+    print('\n')
+
+def student_stats(students: dict) -> None:
+    """Display the statistics of the students."""
+    min_score = float('inf')
+    max_score = float('-inf')
+    unselected = 0
+    min_student = ''
+    max_student = ''
+    lo_scores = []
+    for stud, score in students.items():
+        if len(score) == 0:
+            unselected += 1
+            continue
+        curr_score = sum(score)/len(score)
+        if curr_score < min_score:
+            min_score = curr_score
+            min_student = stud
+        if curr_score > max_score:
+            max_score = curr_score
+            max_student = stud
+        lo_scores.append(curr_score)
+    max_str = f"The student with the highest score is {max_student} with a score of {max_score}."
+    min_str = f"The student with the lowest score is {min_student} with a score of {min_score}."
+    unselected_str = f"The number of students who have not been selected is {unselected}."
+    print(Fore.GREEN + max_str + Style.RESET_ALL)
+    print(Fore.YELLOW + min_str + Style.RESET_ALL)
+    print(Fore.RED + unselected_str + Style.RESET_ALL)
+    print(Fore.CYAN + f"The average score is {sum(lo_scores)/len(lo_scores)}" + Style.RESET_ALL)
+
 def user_loop(student_records: dict) -> None:
     """Loop for the user interaction."""
     while True:
@@ -163,11 +199,18 @@ def user_loop(student_records: dict) -> None:
             death_knell(student_records)
             print(Fore.GREEN + "The records have been saved." + Style.RESET_ALL)
             exit()
+        elif picked == 'copy':
+            save_records(student_records, RECORDS_COPY_FNAME)
+            print(Fore.GREEN + "The records have been saved." + Style.RESET_ALL)
         elif picked == 'add':
             student = input("Type in the student's name: ")
             add_record(student_records, student)
         elif picked == 'display':
             display_names(student_records)
+        elif picked == 'stats':
+            student_stats(student_records)
+        elif picked == 'scores':
+            print_scores(student_records)
         elif picked == 'test':
             test_picker(student_records)
         elif picked == 'help':
@@ -175,7 +218,7 @@ def user_loop(student_records: dict) -> None:
         elif picked == 'options':
             print(Fore.GREEN
                   + "The options are: next, unpicked, lowest, add, display, "
-                  + "exit, test, help, or options."
+                  + "exit, test, help, stats, scores, or options."
                   + Style.RESET_ALL)
         else:
             print(Fore.YELLOW + "Invalid response. Please try again." + Style.RESET_ALL + "\n")
